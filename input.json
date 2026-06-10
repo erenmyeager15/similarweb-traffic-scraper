@@ -1,0 +1,12 @@
+{
+  "domains": [
+    "amazon.com",
+    "flipkart.com",
+    "myntra.com"
+  ],
+  "maxResults": 5,
+  "proxyConfiguration": {
+    "useApifyProxy": true,
+    "apifyProxyGroups": ["RESIDENTIAL"]
+  }
+}

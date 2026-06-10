@@ -1,0 +1,33 @@
+{
+  "actorSpecification": 1,
+  "name": "similarweb-traffic-scraper",
+  "title": "SimilarWeb Scraper - Website Traffic & Analytics",
+  "description": "Scrapes SimilarWeb for public website traffic data: global rank, monthly visits, engagement, traffic sources, top countries, and more.",
+  "version": "1.0",
+  "dockerfile": "Dockerfile",
+  "input": "../INPUT_SCHEMA.json",
+  "pricingInfo": {
+    "pricingModel": "PAY_PER_EVENT",
+    "pricingPerEvent": {
+      "actorChargeEvents": {
+        "website-scraped": {
+          "eventTitle": "Website scraped",
+          "eventDescription": "Charged once for each website successfully scraped with data.",
+          "eventPriceUsd": 0.005,
+          "isPrimaryEvent": true,
+          "isOneTimeEvent": false
+        }
+      }
+    }
+  },
+  "categories": ["SEO_TOOLS", "BUSINESS", "LEAD_GENERATION"],
+  "minMemoryMbytes": 2048,
+  "maxMemoryMbytes": 8192,
+  "defaultRunOptions": {
+    "memoryMbytes": 4096,
+    "timeoutSecs": 43200
+  },
+  "storages": {
+    "dataset": "./dataset_schema.json"
+  }
+}

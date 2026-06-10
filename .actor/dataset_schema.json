@@ -1,0 +1,53 @@
+{
+  "actorSpecification": 1,
+  "fields": {
+    "type": "object",
+    "properties": {
+      "domain": { "type": "string", "title": "Domain", "example": "amazon.com" },
+      "globalRank": { "type": ["integer", "null"], "title": "Global Rank", "example": 12 },
+      "categoryRank": { "type": ["integer", "null"], "title": "Category Rank", "example": 1 },
+      "categoryName": { "type": ["string", "null"], "title": "Category", "example": "E-commerce & Shopping" },
+      "monthlyVisits": { "type": ["string", "null"], "title": "Monthly Visits", "example": "2.5B" },
+      "visitDuration": { "type": ["number", "null"], "title": "Visit Duration (s)", "example": 420 },
+      "pagesPerVisit": { "type": ["number", "null"], "title": "Pages / Visit", "example": 8.5 },
+      "bounceRate": { "type": ["number", "null"], "title": "Bounce Rate", "example": 34.2 },
+      "similarWebUrl": { "type": "string", "title": "SimilarWeb URL", "example": "https://www.similarweb.com/website/amazon.com/" },
+      "scrapedAt": { "type": "string", "title": "Scraped At", "example": "2026-06-10T12:00:00.000Z" }
+    }
+  },
+  "views": {
+    "overview": {
+      "title": "Website Traffic",
+      "description": "SimilarWeb traffic and analytics by domain.",
+      "transformation": {
+        "fields": [
+          "domain",
+          "globalRank",
+          "categoryRank",
+          "categoryName",
+          "monthlyVisits",
+          "visitDuration",
+          "pagesPerVisit",
+          "bounceRate",
+          "similarWebUrl",
+          "scrapedAt"
+        ]
+      },
+      "display": {
+        "component": "table",
+        "properties": {
+          "domain": { "label": "Domain", "format": "text" },
+          "globalRank": { "label": "Global Rank", "format": "number" },
+          "categoryRank": { "label": "Cat. Rank", "format": "number" },
+          "categoryName": { "label": "Category", "format": "text" },
+          "monthlyVisits": { "label": "Monthly Visits", "format": "text" },
+          "visitDuration": { "label": "Visit Dur (s)", "format": "number" },
+          "pagesPerVisit": { "label": "Pages/Visit", "format": "number" },
+          "bounceRate": { "label": "Bounce %", "format": "number" },
+          "similarWebUrl": { "label": "SimilarWeb", "format": "link" },
+          "scrapedAt": { "label": "Scraped At", "format": "date" }
+        }
+      }
+    }
+  }
+}
