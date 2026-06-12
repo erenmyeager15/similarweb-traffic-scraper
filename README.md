@@ -104,6 +104,12 @@ This Actor uses Apify Pay Per Event pricing. You are charged once per website th
 - `monthlyVisits` is an estimated value returned as a numeric string. Percentage fields are rounded to one decimal place.
 - SimilarWeb may block automated traffic; residential proxies are strongly recommended and domains that return no data are skipped (and not billed).
 
+## Responsible Use
+
+This Actor is intended for lawful collection of publicly available information only. Users are responsible for ensuring their use complies with the source website's terms, robots.txt, applicable privacy laws, including India's DPDP Act, and all local regulations.
+
+Do not use this Actor to collect, store, sell, or misuse personal data without a lawful basis. The Actor author is not responsible for misuse by end users.
+
 ## License
 
 Apache-2.0. See `LICENSE`.

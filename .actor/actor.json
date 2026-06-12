@@ -20,7 +20,7 @@
       }
     }
   },
-  "categories": ["SEO_TOOLS", "BUSINESS", "LEAD_GENERATION"],
+  "categories": ["SEO_TOOLS", "BUSINESS"],
   "minMemoryMbytes": 2048,
   "maxMemoryMbytes": 8192,
   "defaultRunOptions": {
