@@ -472,7 +472,7 @@ export async function scrapeSimilarWebDomain(domain: string, proxyConfiguration?
   }
 
   const readerUrls = [
-    `https://r.jina.ai/http://https://www.similarweb.com/website/${domain}/`,
+    `https://r.jina.ai/https://www.similarweb.com/website/${domain}/`,
     `https://r.jina.ai/http://www.similarweb.com/website/${domain}/`,
   ];
 

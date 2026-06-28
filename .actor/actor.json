@@ -31,7 +31,7 @@
   },
   "categories": ["SEO_TOOLS", "OTHER"],
   "minMemoryMbytes": 1024,
-  "maxMemoryMbytes": 8192,
+  "maxMemoryMbytes": 1024,
   "defaultRunOptions": {
     "memoryMbytes": 1024,
     "timeoutSecs": 3600
