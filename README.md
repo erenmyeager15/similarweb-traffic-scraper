@@ -1,112 +1,118 @@
-# SimilarWeb Website Traffic Scraper - Rank, Visits & Traffic Sources
+# SimilarWeb Scraper - Website Traffic & Analytics
 
-Scrape public SimilarWeb website traffic data — global rank, monthly visits, engagement metrics, traffic sources, and top countries — for any list of domains. Get competitor traffic insights without an expensive SimilarWeb subscription, and export to JSON, CSV, Excel, or HTML, or pull via the Apify API — no SimilarWeb login and no API key required.
+Scrape public SimilarWeb website traffic data for one or more domains, including global rank, category rank, estimated monthly visits, engagement metrics, bounce rate, and SimilarWeb profile URLs. Export clean results to JSON, CSV, Excel, or HTML, or pull them through the Apify API.
 
-This SimilarWeb scraper reads each domain's public traffic data, validates and deduplicates your domain list automatically, and runs through residential proxies with anti-bot retries so results stay reliable. Every clean record is saved to the Apify Dataset, ready to export or feed into your own analysis.
+For a fast, low-cost first run, use the default sample input: `openai.com` with `maxResults: 1`.
 
 ## What It Extracts
 
-For each domain (one record in the dataset):
+For each website domain, the Actor can return:
 
-- `domain`
-- `globalRank`, `countryRank`, `categoryRank`
-- `categoryName`
-- `monthlyVisits` (estimated visits)
-- `visitDuration` (average, seconds), `pagesPerVisit`, `bounceRate`
-- `topCountries` — top source countries with traffic percentage
-- `trafficSources` — breakdown of `direct`, `search`, `social`, `referral`, `email`, `displayAds`
-- `similarWebUrl` — link to the SimilarWeb profile page
-- `scrapedAt` timestamp
+- Domain
+- Global rank, country rank, and category rank
+- Category name
+- Estimated monthly visits
+- Visit duration, pages per visit, and bounce rate
+- Top source countries when available
+- Traffic-source breakdown when available
+- SimilarWeb profile URL
+- Scraped timestamp
 
-The output record also includes `trafficChangeMoM`, `topReferringDomains`, `topSearchKeywords`, `topSocialNetworks`, and `technologies` fields. These are part of the schema but are not provided by the public data endpoint, so they are currently returned as `null` or empty arrays (see Known Limits).
+Some advanced fields, such as referring domains, search keywords, social networks, technologies, or month-over-month traffic change, depend on what SimilarWeb exposes publicly and may be returned as `null` or empty arrays.
 
 ## Use Cases
 
-1. **Competitor research**: Benchmark competitor traffic volume and channel mix against your own performance.
-2. **Digital marketing analysis**: See which channels (direct, search, social, referral, email, display) drive traffic to target websites.
-3. **SEO and market strategy**: Compare global, country, and category rank across a set of domains to prioritize where to compete.
-4. **Investor due diligence**: Validate website traffic claims with independent third-party estimates before investing.
-5. **Market sizing**: Estimate market opportunity by scraping traffic across an entire list of industry players in one run.
+- Competitor website traffic research
+- SEO and market research
+- Website benchmark reports
+- Investor or startup traffic checks
+- Agency research for client websites
+- Market sizing from public traffic estimates
 
-## Pricing
+## Pricing and Usage
 
-This Actor uses Apify Pay Per Event pricing. You are charged once per website that is successfully scraped and saved with data — blocked or not-found domains are not billed. Apify platform compute and proxy usage are billed separately by Apify.
+This Actor uses Apify Pay Per Event pricing. You are charged once per website that is successfully scraped and saved with data. Blocked or not-found domains are not charged as website records.
 
-| Event name | Price per event | 1,000 websites | 10,000 websites |
-| --- | ---: | ---: | ---: |
-| `website-scraped` | $0.005 | $5.00 | $50.00 |
+Apify platform compute and proxy usage may be billed separately depending on your plan and run settings. Residential proxies are recommended for SimilarWeb reliability, but they may add proxy usage cost.
+
+Cost-control tips:
+
+- Start with one domain and `maxResults: 1`.
+- Test with a reliable domain such as `openai.com`.
+- Increase domain volume only after the sample output looks correct.
+- Use your Apify run cost limit for larger batches.
 
 ## Input
 
 | Field | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `domains` | string[] | Yes | `["amazon.com"]` | Website domains to scrape (e.g. `amazon.com`). Enter without `https://` or `www.`. |
-| `maxResults` | integer | No | `10` | Maximum number of domains to scrape from the list (1–1000). |
-| `proxyConfiguration` | object | No | `{ useApifyProxy: true, apifyProxyGroups: ["RESIDENTIAL"] }` | Proxy settings. Residential proxies are strongly recommended for SimilarWeb. |
+| `domains` | string array | Yes | `["openai.com"]` | Website domains to scrape. Enter domains without `https://` or `www.`. |
+| `maxResults` | integer | No | `1` | Maximum number of domains to scrape from the list. |
+| `proxyConfiguration` | object | No | Residential Apify Proxy | Proxy settings. Residential proxies are recommended for reliability. |
 
-## How to Scrape SimilarWeb (Step by Step)
-
-1. Click **Try for free** / **Run**.
-2. Add the domains you want to analyze to `domains` (e.g. `amazon.com`, `flipkart.com`) — no `https://` or `www.` needed.
-3. Set `maxResults` to cap how many domains run (start small to test).
-4. Keep residential proxies enabled and run the Actor.
-5. Export results from the Apify Dataset as JSON, CSV, Excel, or HTML, or pull them via the Apify API.
-
-## Sample Output
+## Example Input
 
 ```json
 {
-  "domain": "amazon.com",
-  "globalRank": 11,
+  "domains": ["openai.com"],
+  "maxResults": 1,
+  "proxyConfiguration": {
+    "useApifyProxy": true,
+    "apifyProxyGroups": ["RESIDENTIAL"]
+  }
+}
+```
+
+## Output Example
+
+```json
+{
+  "domain": "openai.com",
+  "globalRank": 201,
   "countryRank": null,
-  "categoryRank": 1,
-  "categoryName": "E-commerce and Shopping",
-  "monthlyVisits": "2700000000",
-  "visitDuration": 312,
-  "pagesPerVisit": 8.9,
-  "bounceRate": 32.5,
+  "categoryRank": 6,
+  "categoryName": "ai_chatbots_and_tools",
+  "monthlyVisits": "203086642",
+  "visitDuration": 144.79,
+  "pagesPerVisit": 2.81,
+  "bounceRate": 58.2,
   "trafficChangeMoM": null,
-  "topCountries": [
-    { "country": "US", "trafficPercentage": 85.2 },
-    { "country": "DE", "trafficPercentage": 3.1 },
-    { "country": "GB", "trafficPercentage": 2.8 }
-  ],
+  "topCountries": [],
   "trafficSources": {
-    "direct": 65.2,
-    "search": 22.1,
-    "social": 3.5,
-    "referral": 5.8,
-    "email": 2.1,
-    "displayAds": 1.3
+    "direct": null,
+    "search": null,
+    "social": null,
+    "referral": null,
+    "email": null,
+    "displayAds": null
   },
   "topReferringDomains": [],
   "topSearchKeywords": [],
   "topSocialNetworks": [],
   "technologies": [],
-  "similarWebUrl": "https://www.similarweb.com/website/amazon.com/",
-  "scrapedAt": "2026-06-10T08:30:00.000Z"
+  "similarWebUrl": "https://www.similarweb.com/website/openai.com/",
+  "scrapedAt": "2026-06-21T13:11:18.000Z"
 }
 ```
 
 ## How It Works
 
-1. Normalizes each domain (strips `https://`, `www.`, and paths), validates it, and removes duplicates.
-2. Requests SimilarWeb's public JSON data endpoint (`data.similarweb.com/api/v1/data`) for each domain through residential proxies — more reliable than the Cloudflare-gated, login-walled website DOM.
-3. Parses rank, engagement, traffic sources, and top countries from the response.
-4. Saves the clean `WebsiteRecord` to the Apify Dataset.
-5. Charges `website-scraped` once the record is saved. Blocked or empty responses are skipped without charging.
+1. Normalizes each domain by removing protocols, `www.`, and paths.
+2. Validates and deduplicates the domain list.
+3. Requests the public SimilarWeb website page for each domain.
+4. Parses visible rank, traffic, and engagement fields, with JSON parsing kept for compatible responses.
+5. Saves each clean website record to the Apify Dataset with the `website-scraped` event.
 
 ## Known Limits
 
-- Only **public** traffic estimates are returned. Detailed breakdowns behind SimilarWeb's login wall are not available.
-- `topReferringDomains`, `topSearchKeywords`, `topSocialNetworks`, and `technologies` are included in the output schema but are **not supplied by the public data endpoint**, so they are currently returned as empty arrays. `trafficChangeMoM` is returned as `null` for the same reason.
-- `topCountries` reports ISO country codes (e.g. `US`, `DE`, `GB`) rather than full country names.
-- `monthlyVisits` is an estimated value returned as a numeric string. Percentage fields are rounded to one decimal place.
-- SimilarWeb may block automated traffic; residential proxies are strongly recommended and domains that return no data are skipped (and not billed).
+- SimilarWeb traffic values are public third-party estimates, not official analytics from the target website.
+- Some domains may return no public data or may be temporarily blocked.
+- Residential proxies are recommended for reliable live results.
+- This Actor is not affiliated with SimilarWeb.
 
 ## Responsible Use
 
-This Actor is intended for lawful collection of publicly available information only. Users are responsible for ensuring their use complies with the source website's terms, robots.txt, applicable privacy laws, including India's DPDP Act, and all local regulations.
+This Actor is intended for lawful collection of publicly available information only. Users are responsible for ensuring their use complies with source website terms, robots.txt, privacy laws, and local regulations.
 
 Do not use this Actor to collect, store, sell, or misuse personal data without a lawful basis. The Actor author is not responsible for misuse by end users.
 

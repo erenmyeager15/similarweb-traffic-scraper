@@ -6,10 +6,19 @@
   "version": "1.0",
   "dockerfile": "Dockerfile",
   "input": "../INPUT_SCHEMA.json",
+  "readme": "../README.md",
+  "output": "./output_schema.json",
   "pricingInfo": {
     "pricingModel": "PAY_PER_EVENT",
     "pricingPerEvent": {
       "actorChargeEvents": {
+        "apify-actor-start": {
+          "eventTitle": "Actor Start",
+          "eventDescription": "Charged when the Actor starts running. Number of events charged depends on Actor memory (one event per GB, minimum one event).",
+          "eventPriceUsd": 0.00005,
+          "isPrimaryEvent": false,
+          "isOneTimeEvent": true
+        },
         "website-scraped": {
           "eventTitle": "Website scraped",
           "eventDescription": "Charged once for each website successfully scraped with data.",
@@ -20,12 +29,16 @@
       }
     }
   },
-  "categories": ["SEO_TOOLS", "BUSINESS"],
-  "minMemoryMbytes": 2048,
+  "categories": ["SEO_TOOLS", "OTHER"],
+  "minMemoryMbytes": 1024,
   "maxMemoryMbytes": 8192,
   "defaultRunOptions": {
-    "memoryMbytes": 4096,
-    "timeoutSecs": 43200
+    "memoryMbytes": 1024,
+    "timeoutSecs": 3600
+  },
+  "exampleRunInput": {
+    "body": "{\n  \"domains\": [\"openai.com\"],\n  \"maxResults\": 1,\n  \"proxyConfiguration\": {\n    \"useApifyProxy\": true,\n    \"apifyProxyGroups\": [\"RESIDENTIAL\"]\n  }\n}",
+    "contentType": "application/json; charset=utf-8"
   },
   "storages": {
     "dataset": "./dataset_schema.json"

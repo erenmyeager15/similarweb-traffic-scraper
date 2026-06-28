@@ -1,7 +1,6 @@
 import { Actor, log } from 'apify';
-import { PlaywrightCrawler } from 'crawlee';
-import { overviewHandler } from './routes.js';
-import type { ActorInput, WebsiteRecord } from './types.js';
+import { getSimilarWebRunState, scrapeSimilarWebDomain } from './routes.js';
+import type { ActorInput } from './types.js';
 
 function normalizeDomain(input: string): string {
   let domain = input.trim().toLowerCase();
@@ -25,7 +24,7 @@ function validateDomains(domains: string[]): string[] {
     }
 
     if (!domainRegex.test(normalized)) {
-      log.warning(`Skipping invalid domain: "${raw}" → "${normalized}"`);
+      log.warning(`Skipping invalid domain: "${raw}" -> "${normalized}"`);
       continue;
     }
 
@@ -69,41 +68,25 @@ Actor.main(async () => {
         apifyProxyGroups: ['RESIDENTIAL'],
       });
 
-  const crawler = new PlaywrightCrawler({
-    proxyConfiguration,
-    sessionPoolOptions: {
-      maxPoolSize: 10,
-      sessionOptions: {
-        maxUsageCount: 10,
-      },
-    },
-    maxConcurrency: 2,
-    maxRequestRetries: 3,
-    retryOnBlocked: true,
-    useSessionPool: true,
-    requestHandlerTimeoutSecs: 120,
-    preNavigationHooks: [
-      async ({ page }) => {
-        await page.setExtraHTTPHeaders({
-          'Accept-Language': 'en-US,en;q=0.9',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
-        });
-      },
-    ],
-    requestHandler: overviewHandler,
-    failedRequestHandler: async ({ request, log: ctxLog }) => {
-      ctxLog.error(`Request failed after all retries: ${request.url} — not charging.`);
-    },
-  });
+  let failedDomainCount = 0;
 
-  const requests = domains.map((domain) => ({
-    url: `https://data.similarweb.com/api/v1/data?domain=${domain}`,
-    userData: { domain },
-  }));
+  for (const domain of domains) {
+    const saved = await scrapeSimilarWebDomain(domain, proxyConfiguration);
+    if (!saved) failedDomainCount += 1;
+  }
 
-  await crawler.run(requests);
+  const runState = getSimilarWebRunState();
+  if (runState.fatalBillingError) throw runState.fatalBillingError;
+  if (runState.savedWebsiteCount === 0 && failedDomainCount > 0) {
+    await Actor.setStatusMessage(`Finished with no saved websites. SimilarWeb returned no usable data for ${failedDomainCount} domain(s).`);
+    log.warning(`SimilarWeb returned no usable data for ${failedDomainCount} domain(s). Finishing without charging website-scraped events.`);
+    return;
+  }
+  if (runState.savedWebsiteCount === 0 && !runState.spendingLimitReached) {
+    await Actor.setStatusMessage('Finished with no saved websites.');
+    log.warning('SimilarWeb scrape finished with no saved websites.');
+    return;
+  }
 
-  log.info('SimilarWeb scraper finished successfully.');
+  log.info(`SimilarWeb scraper finished successfully with ${runState.savedWebsiteCount} saved website records.`);
 });
