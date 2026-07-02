@@ -1,10 +1,8 @@
 {
+  "apiKey": "YOUR_SIMILARWEB_API_KEY",
   "domains": [
     "openai.com"
   ],
   "maxResults": 1,
-  "proxyConfiguration": {
-    "useApifyProxy": true,
-    "apifyProxyGroups": ["RESIDENTIAL"]
-  }
+  "country": "world"
 }

@@ -1,36 +1,54 @@
 {
-  "title": "SimilarWeb Website Traffic Scraper",
-  "description": "Provide a list of domains to scrape public SimilarWeb traffic and analytics data. The default sample uses one domain for a fast, low-cost test run.",
+  "title": "SimilarWeb Traffic Scraper (official API, bring your own key)",
+  "description": "Fetch website traffic and ranking data from the OFFICIAL Similarweb REST API using your own Similarweb API key. This Actor is not a no-key public-page scraper: a valid Similarweb API subscription and key are required. Runs without a key fail immediately and are not charged.",
   "type": "object",
   "schemaVersion": 1,
-  "required": ["domains"],
+  "required": ["apiKey", "domains"],
   "properties": {
+    "apiKey": {
+      "title": "Similarweb API key",
+      "type": "string",
+      "description": "Your official Similarweb API key from your Similarweb account (Account > API, or provided by your Similarweb plan). Required. The Actor calls the official Similarweb REST API on your behalf and never scrapes public pages. Each domain consumes your own Similarweb API credits.",
+      "editor": "textfield",
+      "isSecret": true
+    },
     "domains": {
       "title": "Domains",
       "type": "array",
-      "description": "List of website domains to scrape (e.g. openai.com). Enter domains without https:// or www.",
+      "description": "Website domains to look up, for example openai.com. Enter domains without https:// or www.",
       "editor": "stringList",
       "prefill": ["openai.com"],
       "default": ["openai.com"]
     },
     "maxResults": {
-      "title": "Max Results",
+      "title": "Max domains",
       "type": "integer",
-      "description": "Maximum number of domains to scrape from the list. Start with 1 for a fast, low-cost test.",
+      "description": "Maximum number of domains from the list to query. Each domain uses your Similarweb API credits, so start with 1 for a low-cost test.",
       "editor": "number",
       "default": 1,
+      "prefill": 1,
       "minimum": 1,
       "maximum": 1000
     },
-    "proxyConfiguration": {
-      "title": "Proxy Configuration",
-      "type": "object",
-      "description": "Proxy settings. Residential proxies are strongly recommended for SimilarWeb. Proxy traffic may be billed as platform usage.",
-      "editor": "proxy",
-      "default": {
-        "useApifyProxy": true,
-        "apifyProxyGroups": ["RESIDENTIAL"]
-      }
+    "country": {
+      "title": "Country scope",
+      "type": "string",
+      "description": "Country scope for traffic and engagement metrics: use 'world' for worldwide, or a two-letter ISO country code such as us, gb, or in. The value must be included in your Similarweb subscription.",
+      "editor": "textfield",
+      "default": "world",
+      "prefill": "world"
+    },
+    "startDate": {
+      "title": "Start month (YYYY-MM)",
+      "type": "string",
+      "description": "Optional start month for traffic and engagement metrics in YYYY-MM format. Leave empty to use a recent default month range. Similarweb data usually lags by one to two months.",
+      "editor": "textfield"
+    },
+    "endDate": {
+      "title": "End month (YYYY-MM)",
+      "type": "string",
+      "description": "Optional end month for traffic and engagement metrics in YYYY-MM format. Leave empty to use the default recent month. The Actor keeps the latest available value in the range.",
+      "editor": "textfield"
     }
   }
 }

@@ -1,64 +1,57 @@
 export interface ActorInput {
-  domains: string[];
+  apiKey?: string;
+  domains?: string[];
   maxResults?: number;
-  proxyConfiguration?: {
-    useApifyProxy?: boolean;
-    apifyProxyGroups?: string[];
-    apifyProxyCountry?: string;
-  };
+  country?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
-export interface CountryTraffic {
+export interface RunConfig {
+  apiKey: string;
+  domains: string[];
   country: string;
-  trafficPercentage: number;
+  startDate: string | null;
+  endDate: string | null;
 }
 
-export interface TrafficSource {
-  direct: number | null;
-  search: number | null;
-  social: number | null;
-  referral: number | null;
-  email: number | null;
-  displayAds: number | null;
-}
-
-export interface ReferringDomain {
-  domain: string;
-  sharePercentage: number;
-}
-
-export interface SearchKeyword {
-  keyword: string;
-  sharePercentage: number;
-}
-
-export interface SocialNetwork {
-  platform: string;
-  sharePercentage: number;
-}
-
-export interface TechnologyItem {
-  name: string;
-  category: string;
+/**
+ * Raw per-metric API responses collected for a single domain. Each field holds
+ * whatever the official Similarweb endpoint returned (or undefined/null if that
+ * endpoint failed, is not in the caller's plan, or returned no data).
+ */
+export interface MetricResponses {
+  globalRank?: unknown;
+  categoryRank?: unknown;
+  visits?: unknown;
+  pagesPerVisit?: unknown;
+  avgVisitDuration?: unknown;
+  bounceRate?: unknown;
 }
 
 export interface WebsiteRecord {
   domain: string;
+  country: string;
+  startDate: string | null;
+  endDate: string | null;
   globalRank: number | null;
-  countryRank: number | null;
   categoryRank: number | null;
-  categoryName: string | null;
-  monthlyVisits: string | null;
-  visitDuration: number | null;
+  category: string | null;
+  monthlyVisits: number | null;
   pagesPerVisit: number | null;
+  avgVisitDuration: number | null;
   bounceRate: number | null;
-  trafficChangeMoM: number | null;
-  topCountries: CountryTraffic[];
-  trafficSources: TrafficSource;
-  topReferringDomains: ReferringDomain[];
-  topSearchKeywords: SearchKeyword[];
-  topSocialNetworks: SocialNetwork[];
-  technologies: TechnologyItem[];
+  source: 'similarweb-official-api';
   similarWebUrl: string;
   scrapedAt: string;
+}
+
+export interface ChargeResultLike {
+  chargedCount: number;
+  eventChargeLimitReached?: boolean;
+}
+
+export interface ChargeDecision {
+  recordWasSaved: boolean;
+  limitReached: boolean;
 }

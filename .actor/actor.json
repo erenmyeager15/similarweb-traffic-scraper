@@ -2,7 +2,7 @@
   "actorSpecification": 1,
   "name": "similarweb-traffic-scraper",
   "title": "SimilarWeb Scraper - Website Traffic & Analytics",
-  "description": "Scrapes SimilarWeb for public website traffic data: global rank, monthly visits, engagement, traffic sources, top countries, and more.",
+  "description": "Fetch website traffic and ranking data from the official Similarweb REST API using your own Similarweb API key (bring your own key): global rank, category rank, estimated monthly visits, pages per visit, average visit duration, and bounce rate. Not a no-key public-page scraper.",
   "version": "1.0",
   "dockerfile": "Dockerfile",
   "input": "../INPUT_SCHEMA.json",
@@ -21,7 +21,7 @@
         },
         "website-scraped": {
           "eventTitle": "Website scraped",
-          "eventDescription": "Charged once for each website successfully scraped with data.",
+          "eventDescription": "Charged once for each domain that returns real data from the official Similarweb API. Domains with no data, failed requests, or an invalid API key are not charged.",
           "eventPriceUsd": 0.005,
           "isPrimaryEvent": true,
           "isOneTimeEvent": false
@@ -37,7 +37,7 @@
     "timeoutSecs": 3600
   },
   "exampleRunInput": {
-    "body": "{\n  \"domains\": [\"openai.com\"],\n  \"maxResults\": 1,\n  \"proxyConfiguration\": {\n    \"useApifyProxy\": true,\n    \"apifyProxyGroups\": [\"RESIDENTIAL\"]\n  }\n}",
+    "body": "{\n  \"apiKey\": \"YOUR_SIMILARWEB_API_KEY\",\n  \"domains\": [\"openai.com\"],\n  \"maxResults\": 1,\n  \"country\": \"world\"\n}",
     "contentType": "application/json; charset=utf-8"
   },
   "storages": {

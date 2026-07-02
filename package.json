@@ -1,7 +1,7 @@
 {
   "name": "similarweb-traffic-scraper",
   "version": "1.0.0",
-  "description": "Apify Actor that scrapes SimilarWeb public website traffic and analytics overview data",
+  "description": "Apify Actor that fetches website traffic and ranking data from the official Similarweb REST API using your own Similarweb API key",
   "type": "module",
   "main": "src/main.ts",
   "scripts": {
@@ -12,13 +12,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "apify": "^3.1.0",
-    "crawlee": "^3.11.0",
-    "got-scraping": "^4.2.1",
-    "playwright": "^1.48.0"
+    "apify": "^3.1.0"
   },
   "devDependencies": {
     "@apify/tsconfig": "^0.1.0",
+    "@types/node": "^20.14.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^9.0.0",
