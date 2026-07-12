@@ -1,14 +1,14 @@
 {
-  "title": "SimilarWeb Traffic & Website Analytics Scraper",
-  "description": "Get estimated website traffic, engagement, rankings, category, and channel shares. No API key is required for public-data mode. Optionally provide your own Similarweb API key for official API mode. Only domains that return real metrics are saved and charged.",
+  "title": "SimilarWeb Traffic Scraper (official API, bring your own key)",
+  "description": "Fetch website traffic and ranking data from the OFFICIAL Similarweb REST API using your own Similarweb API key. This Actor is not a no-key public-page scraper: a valid Similarweb API subscription and key are required. Runs without a key fail immediately and are not charged.",
   "type": "object",
   "schemaVersion": 1,
-  "required": ["domains"],
+  "required": ["apiKey", "domains"],
   "properties": {
     "apiKey": {
       "title": "Similarweb API key",
       "type": "string",
-      "description": "Optional. Add your official Similarweb API key to use API mode. Leave empty to use no-key public-data mode. Official API mode consumes your Similarweb API credits.",
+      "description": "Your official Similarweb API key from your Similarweb account (Account > API, or provided by your Similarweb plan). Required. The Actor calls the official Similarweb REST API on your behalf and never scrapes public pages. Each domain consumes your own Similarweb API credits.",
       "editor": "textfield",
       "isSecret": true
     },
@@ -23,7 +23,7 @@
     "maxResults": {
       "title": "Max domains",
       "type": "integer",
-      "description": "Maximum number of domains from the list to query. Start with 1 for a quick, low-cost test.",
+      "description": "Maximum number of domains from the list to query. Each domain uses your Similarweb API credits, so start with 1 for a low-cost test.",
       "editor": "number",
       "default": 1,
       "prefill": 1,
@@ -33,7 +33,7 @@
     "country": {
       "title": "Country scope",
       "type": "string",
-      "description": "Official API mode only. Use 'world' or a two-letter country code such as us, gb, or in. The value must be included in your Similarweb subscription.",
+      "description": "Country scope for traffic and engagement metrics: use 'world' for worldwide, or a two-letter ISO country code such as us, gb, or in. The value must be included in your Similarweb subscription.",
       "editor": "textfield",
       "default": "world",
       "prefill": "world"
@@ -41,30 +41,14 @@
     "startDate": {
       "title": "Start month (YYYY-MM)",
       "type": "string",
-      "description": "Official API mode only. Optional start month in YYYY-MM format.",
+      "description": "Optional start month for traffic and engagement metrics in YYYY-MM format. Leave empty to use a recent default month range. Similarweb data usually lags by one to two months.",
       "editor": "textfield"
     },
     "endDate": {
       "title": "End month (YYYY-MM)",
       "type": "string",
-      "description": "Official API mode only. Optional end month in YYYY-MM format.",
+      "description": "Optional end month for traffic and engagement metrics in YYYY-MM format. Leave empty to use the default recent month. The Actor keeps the latest available value in the range.",
       "editor": "textfield"
-    },
-    "proxyConfiguration": {
-      "title": "Proxy (public-data fallback)",
-      "type": "object",
-      "description": "Used only when the public Similarweb endpoint blocks the direct request by region. The default US Residential proxy gives the public sample the best chance of succeeding.",
-      "editor": "proxy",
-      "default": {
-        "useApifyProxy": true,
-        "apifyProxyGroups": ["RESIDENTIAL"],
-        "apifyProxyCountry": "US"
-      },
-      "prefill": {
-        "useApifyProxy": true,
-        "apifyProxyGroups": ["RESIDENTIAL"],
-        "apifyProxyCountry": "US"
-      }
     }
   }
 }
