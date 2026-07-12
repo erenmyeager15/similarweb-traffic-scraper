@@ -6,11 +6,12 @@
   "views": {
     "overview": {
       "title": "Website Traffic",
-      "description": "Official Similarweb API traffic and ranking data by domain.",
+      "description": "Similarweb traffic, engagement, and ranking data by domain.",
       "transformation": {
         "fields": [
           "domain",
           "globalRank",
+          "countryRank",
           "categoryRank",
           "category",
           "monthlyVisits",
@@ -18,6 +19,7 @@
           "avgVisitDuration",
           "bounceRate",
           "country",
+          "source",
           "similarWebUrl",
           "scrapedAt"
         ]
@@ -27,6 +29,7 @@
         "properties": {
           "domain": { "label": "Domain", "format": "text" },
           "globalRank": { "label": "Global Rank", "format": "number" },
+          "countryRank": { "label": "Country Rank", "format": "number" },
           "categoryRank": { "label": "Cat. Rank", "format": "number" },
           "category": { "label": "Category", "format": "text" },
           "monthlyVisits": { "label": "Monthly Visits", "format": "number" },
@@ -34,6 +37,7 @@
           "avgVisitDuration": { "label": "Avg Visit (s)", "format": "number" },
           "bounceRate": { "label": "Bounce %", "format": "number" },
           "country": { "label": "Country", "format": "text" },
+          "source": { "label": "Source", "format": "text" },
           "similarWebUrl": { "label": "SimilarWeb", "format": "link" },
           "scrapedAt": { "label": "Scraped At", "format": "date" }
         }

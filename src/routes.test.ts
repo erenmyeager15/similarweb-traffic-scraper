@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildPublicWebsiteRecord,
   buildWebsiteRecord,
   defaultMonthRange,
   extractLatestNumber,
@@ -9,8 +10,10 @@ import {
 } from './routes.js';
 
 describe('parseConfig (fail fast before network/billing)', () => {
-  it('throws when the API key is missing', () => {
-    expect(() => parseConfig({ domains: ['openai.com'] })).toThrowError(/API key/i);
+  it('uses public-data mode when the API key is missing', () => {
+    const cfg = parseConfig({ domains: ['openai.com'] });
+    expect(cfg.mode).toBe('public-data');
+    expect(cfg.apiKey).toBeNull();
   });
 
   it('throws when no valid domains are provided', () => {
@@ -25,10 +28,75 @@ describe('parseConfig (fail fast before network/billing)', () => {
       maxResults: 5,
     });
     expect(cfg.apiKey).toBe('my-key');
+    expect(cfg.mode).toBe('official-api');
     expect(cfg.domains).toEqual(['openai.com']);
     expect(cfg.country).toBe('us');
     expect(cfg.startDate).toMatch(/^\d{4}-\d{2}$/);
     expect(cfg.endDate).toMatch(/^\d{4}-\d{2}$/);
+  });
+});
+
+describe('buildPublicWebsiteRecord (maps public summary data)', () => {
+  it('maps ranks, engagement, category, and traffic shares', () => {
+    const record = buildPublicWebsiteRecord('github.com', {
+      Engagments: {
+        BounceRate: 0.4461,
+        Month: 5,
+        Year: 2026,
+        PagePerVisit: 5.27,
+        Visits: 498123456,
+        TimeOnSite: 412.4,
+      },
+      GlobalRank: { Rank: 71 },
+      CountryRank: { CountryCode: 'US', Rank: 86 },
+      CategoryRank: { Category: 'Computers_Electronics_and_Technology', Rank: 2 },
+      TrafficSources: {
+        Direct: 0.512,
+        SearchOrganic: 0.331,
+        SearchPaid: 0.004,
+        SocialOrganic: 0.081,
+        SocialPaid: 0.002,
+        Referrals: 0.056,
+        Mail: 0.008,
+        DisplayAds: 0.003,
+        GenAi: 0.002,
+        Affiliate: 0.001,
+      },
+    });
+
+    expect(record).toMatchObject({
+      domain: 'github.com',
+      country: 'us',
+      startDate: '2026-05',
+      endDate: '2026-05',
+      globalRank: 71,
+      countryRank: 86,
+      categoryRank: 2,
+      category: 'Computers_Electronics_and_Technology',
+      monthlyVisits: 498123456,
+      pagesPerVisit: 5.27,
+      avgVisitDuration: 412.4,
+      bounceRate: 44.6,
+      source: 'similarweb-public-data',
+      trafficSources: {
+        direct: 51.2,
+        organicSearch: 33.1,
+        paidSearch: 0.4,
+        organicSocial: 8.1,
+        paidSocial: 0.2,
+        referrals: 5.6,
+        email: 0.8,
+        displayAds: 0.3,
+        genAi: 0.2,
+        affiliate: 0.1,
+      },
+    });
+    expect(hasRealMetric(record)).toBe(true);
+  });
+
+  it('does not create a real metric from an empty or error response', () => {
+    const record = buildPublicWebsiteRecord('missing.example', { message: 'Forbidden' });
+    expect(hasRealMetric(record)).toBe(false);
   });
 });
 
@@ -51,6 +119,7 @@ describe('buildWebsiteRecord (maps official API responses)', () => {
       startDate: '2026-03',
       endDate: '2026-05',
       globalRank: 201,
+      countryRank: null,
       categoryRank: 6,
       category: 'Computers_Electronics_and_Technology',
       monthlyVisits: 210500000,

@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "apify": "^3.1.0"
+    "apify": "^3.1.0",
+    "got-scraping": "^4.2.1"
   },
   "devDependencies": {
     "@apify/tsconfig": "^0.1.0",

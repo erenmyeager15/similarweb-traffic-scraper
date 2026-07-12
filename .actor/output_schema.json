@@ -1,13 +1,13 @@
 {
   "actorOutputSchemaVersion": 1,
   "title": "SimilarWeb Traffic Scraper Output",
-  "description": "Structured website traffic records from the official Similarweb API: domain, global and category rank, category, estimated monthly visits, pages per visit, average visit duration, bounce rate, country scope, SimilarWeb profile URL, and scraped timestamp.",
+  "description": "Structured Similarweb traffic records: domain, global/country/category rank, estimated monthly visits, engagement, traffic channel shares, source, profile URL, and timestamp.",
   "type": "object",
   "properties": {
     "results": {
       "type": "string",
       "title": "SimilarWeb website traffic records",
-      "description": "Clean dataset items containing official Similarweb API traffic, ranking, category, and engagement data by domain.",
+      "description": "Clean dataset items containing Similarweb traffic, ranking, category, engagement, and source data by domain.",
       "template": "{{links.apiDefaultDatasetUrl}}/items"
     }
   }

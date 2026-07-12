@@ -1,14 +1,17 @@
 import { Actor, log } from 'apify';
+import { gotScraping } from 'got-scraping';
 import type {
   ActorInput,
   ChargeDecision,
   ChargeResultLike,
   MetricResponses,
+  ProxyLike,
   RunConfig,
   WebsiteRecord,
 } from './types.js';
 
 const DEFAULT_BASE_URL = 'https://api.similarweb.com/v1';
+const PUBLIC_DATA_URL = 'https://data.similarweb.com/api/v1/data';
 export const WEBSITE_SCRAPED_EVENT = 'website-scraped';
 const MAX_DOMAINS = 1000;
 
@@ -107,7 +110,8 @@ function normalizePositiveInt(value: unknown, fallback: number): number {
 
 /**
  * Validates and normalizes actor input. Throws immediately (before any network
- * request or billing event) when the API key or domains are missing/invalid.
+ * request or billing event). A key selects the official API; without one the
+ * Actor uses Similarweb's public website-summary endpoint.
  */
 export function parseConfig(input: ActorInput | null): RunConfig {
   if (!input || typeof input !== 'object') {
@@ -115,12 +119,6 @@ export function parseConfig(input: ActorInput | null): RunConfig {
   }
 
   const apiKey = typeof input.apiKey === 'string' ? input.apiKey.trim() : '';
-  if (!apiKey) {
-    throw new Error(
-      'A Similarweb API key is required. This Actor uses the official Similarweb API (bring your own key) and does not scrape public pages. Add your key in the "Similarweb API key" field.',
-    );
-  }
-
   const rawDomains = Array.isArray(input.domains) ? input.domains : [];
   const maxResults = normalizePositiveInt(input.maxResults, rawDomains.length || 1);
   const domains = validateDomains(rawDomains.slice(0, maxResults));
@@ -140,7 +138,14 @@ export function parseConfig(input: ActorInput | null): RunConfig {
     endDate = endDate ?? def.endDate;
   }
 
-  return { apiKey, domains, country, startDate, endDate };
+  return {
+    mode: apiKey ? 'official-api' : 'public-data',
+    apiKey: apiKey || null,
+    domains,
+    country,
+    startDate,
+    endDate,
+  };
 }
 
 /** Extracts the latest numeric value from a Similarweb metric series or scalar. */
@@ -239,13 +244,96 @@ export function buildWebsiteRecord(
     startDate: config.startDate,
     endDate: config.endDate,
     globalRank: extractRank(responses.globalRank, 'global_rank'),
+    countryRank: null,
     categoryRank: extractRank(responses.categoryRank, 'category_rank'),
     category: extractCategory(responses.categoryRank),
     monthlyVisits: round(extractLatestNumber(responses.visits, 'visits'), 0),
     pagesPerVisit: round(extractLatestNumber(responses.pagesPerVisit, 'pages_per_visit'), 2),
     avgVisitDuration: round(extractLatestNumber(responses.avgVisitDuration, 'average_visit_duration'), 2),
     bounceRate: normalizeBounce(extractLatestNumber(responses.bounceRate, 'bounce_rate')),
+    trafficSources: emptyTrafficSources(),
     source: 'similarweb-official-api',
+    similarWebUrl: `https://www.similarweb.com/website/${domain}/`,
+    scrapedAt: new Date().toISOString(),
+  };
+}
+
+function emptyTrafficSources(): WebsiteRecord['trafficSources'] {
+  return {
+    direct: null,
+    organicSearch: null,
+    paidSearch: null,
+    organicSocial: null,
+    paidSocial: null,
+    referrals: null,
+    email: null,
+    displayAds: null,
+    genAi: null,
+    affiliate: null,
+  };
+}
+
+function getObject(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : {};
+}
+
+function getRank(value: unknown): number | null {
+  const obj = getObject(value);
+  return toNumber(obj.Rank ?? obj.rank ?? value);
+}
+
+function normalizeShare(value: unknown): number | null {
+  const number = toNumber(value);
+  if (number === null) return null;
+  return round(number <= 1 ? number * 100 : number, 2);
+}
+
+function publicMetricMonth(engagements: Record<string, unknown>): string | null {
+  const year = toNumber(engagements.Year ?? engagements.year);
+  const month = toNumber(engagements.Month ?? engagements.month);
+  if (year === null || month === null || month < 1 || month > 12) return null;
+  return `${Math.trunc(year)}-${String(Math.trunc(month)).padStart(2, '0')}`;
+}
+
+/** Maps the documented public website-summary shape without inventing data. */
+export function buildPublicWebsiteRecord(domain: string, data: unknown): WebsiteRecord {
+  const root = getObject(data);
+  const engagements = getObject(root.Engagments ?? root.Engagements);
+  const categoryRank = getObject(root.CategoryRank);
+  const countryRank = getObject(root.CountryRank);
+  const traffic = getObject(root.TrafficSources);
+  const metricMonth = publicMetricMonth(engagements);
+
+  return {
+    domain,
+    country: typeof countryRank.CountryCode === 'string' ? countryRank.CountryCode.toLowerCase() : null,
+    startDate: metricMonth,
+    endDate: metricMonth,
+    globalRank: getRank(root.GlobalRank),
+    countryRank: getRank(countryRank),
+    categoryRank: getRank(categoryRank),
+    category: typeof categoryRank.Category === 'string'
+      ? categoryRank.Category
+      : typeof root.Category === 'string' ? root.Category : null,
+    monthlyVisits: round(toNumber(engagements.Visits), 0),
+    pagesPerVisit: round(toNumber(engagements.PagePerVisit), 2),
+    avgVisitDuration: round(toNumber(engagements.TimeOnSite), 2),
+    bounceRate: normalizeBounce(toNumber(engagements.BounceRate)),
+    trafficSources: {
+      direct: normalizeShare(traffic.Direct),
+      organicSearch: normalizeShare(traffic.SearchOrganic),
+      paidSearch: normalizeShare(traffic.SearchPaid),
+      organicSocial: normalizeShare(traffic.SocialOrganic),
+      paidSocial: normalizeShare(traffic.SocialPaid),
+      referrals: normalizeShare(traffic.Referrals),
+      email: normalizeShare(traffic.Mail),
+      displayAds: normalizeShare(traffic.DisplayAds),
+      genAi: normalizeShare(traffic.GenAi),
+      affiliate: normalizeShare(traffic.Affiliate),
+    },
+    source: 'similarweb-public-data',
     similarWebUrl: `https://www.similarweb.com/website/${domain}/`,
     scrapedAt: new Date().toISOString(),
   };
@@ -254,6 +342,7 @@ export function buildWebsiteRecord(
 /** True only when at least one real metric was returned by the API. */
 export function hasRealMetric(record: WebsiteRecord): boolean {
   return record.globalRank !== null
+    || record.countryRank !== null
     || record.categoryRank !== null
     || record.monthlyVisits !== null
     || record.pagesPerVisit !== null
@@ -278,6 +367,7 @@ async function fetchMetric(
   params: Record<string, string | undefined>,
 ): Promise<{ status: number; data: unknown }> {
   const url = new URL(`${DEFAULT_BASE_URL}/website/${encodeURIComponent(domain)}/${endpointPath}`);
+  if (!config.apiKey) throw new Error('Official Similarweb API mode requires an API key.');
   url.searchParams.set('api_key', config.apiKey);
   url.searchParams.set('format', 'json');
   for (const [key, value] of Object.entries(params)) {
@@ -316,6 +406,43 @@ async function fetchMetric(
   return { status: 200, data };
 }
 
+async function fetchPublicData(domain: string, proxyConfiguration?: ProxyLike): Promise<unknown> {
+  const url = new URL(PUBLIC_DATA_URL);
+  url.searchParams.set('domain', domain);
+
+  const request = async (proxyUrl?: string): Promise<{ statusCode: number; body: string }> => {
+    const response = await gotScraping({
+      url: url.toString(),
+      proxyUrl,
+      throwHttpErrors: false,
+      timeout: { request: 30_000 },
+      headers: { accept: 'application/json' },
+    });
+    return { statusCode: response.statusCode, body: String(response.body ?? '') };
+  };
+
+  let response = await request();
+  if ([202, 403, 429].includes(response.statusCode) && proxyConfiguration) {
+    const proxyUrl = await proxyConfiguration.newUrl();
+    if (proxyUrl) {
+      log.info(`Public Similarweb endpoint returned HTTP ${response.statusCode} for ${domain}; retrying through the configured proxy.`);
+      response = await request(proxyUrl);
+    }
+  }
+
+  if (response.statusCode !== 200) {
+    log.warning(`Public Similarweb endpoint returned HTTP ${response.statusCode} for ${domain}.`);
+    return null;
+  }
+
+  try {
+    return JSON.parse(response.body);
+  } catch {
+    log.warning(`Public Similarweb endpoint returned non-JSON data for ${domain}.`);
+    return null;
+  }
+}
+
 async function saveWebsiteRecord(record: WebsiteRecord): Promise<boolean> {
   try {
     const chargeResult = await Actor.pushData(record, WEBSITE_SCRAPED_EVENT);
@@ -346,9 +473,23 @@ async function saveWebsiteRecord(record: WebsiteRecord): Promise<boolean> {
 export async function scrapeSimilarWebDomain(
   config: RunConfig,
   domain: string,
+  proxyConfiguration?: ProxyLike,
 ): Promise<{ saved: boolean; hadData: boolean }> {
   if (fatalBillingError) throw fatalBillingError;
   if (spendingLimitReached) return { saved: false, hadData: false };
+
+  if (config.mode === 'public-data') {
+    const data = await fetchPublicData(domain, proxyConfiguration);
+    const record = buildPublicWebsiteRecord(domain, data);
+    if (!hasRealMetric(record)) {
+      log.warning(`Public Similarweb data returned no usable metrics for ${domain}. Not saving or charging.`);
+      return { saved: false, hadData: false };
+    }
+
+    const saved = await saveWebsiteRecord(record);
+    log.info(`Saved ${domain} from public Similarweb data: globalRank=${record.globalRank}, monthlyVisits=${record.monthlyVisits}`);
+    return { saved, hadData: true };
+  }
 
   const trafficParams: Record<string, string | undefined> = {
     start_date: config.startDate ?? undefined,
