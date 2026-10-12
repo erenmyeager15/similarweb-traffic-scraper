@@ -1,6 +1,6 @@
 # SimilarWeb Scraper - Website Traffic & Analytics (Official API)
 
-Fetch website traffic and ranking data from the **official Similarweb REST API** using **your own Similarweb API key**. For each domain you can retrieve global rank, category rank and category, estimated monthly visits, pages per visit, average visit duration, and bounce rate. Export clean results to JSON, CSV, Excel, or HTML, or pull them through the Apify API.
+Compare website traffic, rankings and engagement metrics for competitor benchmarking and SEO research. This independent Actor calls the **official Similarweb REST API** using **your own Similarweb API key**. Collect available global/category ranks, estimated monthly visits, pages per visit, visit duration and bounce rate, then export results to CSV, JSON, Excel or HTML, or retrieve them through the Apify API.
 
 > Important: this is a bring-your-own-key Actor. It calls the official Similarweb API on your behalf and **does not scrape SimilarWeb public pages**. You need a valid Similarweb subscription/API key with API access. Runs without a key fail immediately and are **not** charged the website-scraped event.
 
@@ -69,11 +69,20 @@ Values below are illustrative; real values come from your Similarweb API respons
 }
 ```
 
-## Pricing and Usage
+## Pricing: Domain Results, Actor Start and Your API Credits
 
-This Actor uses Apify Pay Per Event pricing. You are charged once per domain that returns **real data** from the official Similarweb API. Domains with no data, failed API responses, or an invalid/unauthorized API key are **not** charged the website-scraped event.
+This Actor uses Apify Pay Per Event pricing:
 
-Separately, every domain lookup consumes **your own Similarweb API credits**, and Apify platform compute is billed per your plan. Start with one domain and `maxResults: 1` to confirm your key and plan coverage before larger batches.
+| Event | Price |
+| --- | ---: |
+| `website-scraped` | `$0.005` per domain with real saved data, or `$5.00` per 1,000 |
+| `apify-actor-start` | `$0.00005` per GB when the Actor starts, minimum one event |
+
+The website-result event applies once per domain that returns **real data** from the official Similarweb API. Domains with no data, failed API responses or an invalid/unauthorized API key do not trigger `website-scraped`. Domains already saved before a partial failure retain their normal result charges.
+
+The Actor Start fee can still apply to empty or failed runs, including rejected API keys. Apify counts one start event per GB of memory, with at least one event; the unchanged 1024 MB default therefore has a `$0.00005` start-event fee.
+
+Your Similarweb subscription/API credits are separate, required third-party costs and are not supplied by this Actor. API requests consume your own credits according to your Similarweb plan, even when some metrics are unavailable. See the [live Pricing tab](https://apify.com/fascinating_lentil/similarweb-traffic-scraper/pricing) for Apify event prices and whether platform usage is included or added. Start with one domain and `maxResults: 1` to confirm your key and plan coverage before larger batches; do not treat a result-event subtotal as an all-in API cost.
 
 ## How It Works
 

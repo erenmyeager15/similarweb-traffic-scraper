@@ -2,7 +2,7 @@
   "actorSpecification": 1,
   "name": "similarweb-traffic-scraper",
   "title": "SimilarWeb Scraper - Website Traffic & Analytics",
-  "description": "Fetch website traffic and ranking data from the official Similarweb REST API using your own Similarweb API key (bring your own key): global rank, category rank, estimated monthly visits, pages per visit, average visit duration, and bounce rate. Not a no-key public-page scraper.",
+  "description": "Fetch website traffic, rankings and engagement metrics through the official Similarweb API for competitor and SEO research. Export CSV/JSON. Requires your own paid Similarweb API access/key; no public-page scraping. Result/start fees and your API credits apply.",
   "version": "1.0",
   "dockerfile": "Dockerfile",
   "input": "../INPUT_SCHEMA.json",
