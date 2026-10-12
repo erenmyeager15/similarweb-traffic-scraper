@@ -1,0 +1,8 @@
+{
+  "mode": "demo",
+  "demoPreset": "us-traffic-change-alerts",
+  "reportFocusCountry": "us",
+  "visitChangeAlertPercent": 20,
+  "bounceIncreaseAlertPoints": 5,
+  "rankWorseningAlertPercent": 20
+}

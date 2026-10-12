@@ -1,4 +1,14 @@
 export interface ActorInput {
+  mode?: 'demo' | 'import' | 'official-api';
+  importRecords?: Record<string, unknown>[];
+  importCsv?: string;
+  importSource?: string;
+  authorizedData?: boolean;
+  demoPreset?: 'us-agency-comparison' | 'us-traffic-change-alerts' | 'us-scope-audit';
+  reportFocusCountry?: string;
+  visitChangeAlertPercent?: number;
+  bounceIncreaseAlertPoints?: number;
+  rankWorseningAlertPercent?: number;
   apiKey?: string;
   domains?: string[];
   maxResults?: number;

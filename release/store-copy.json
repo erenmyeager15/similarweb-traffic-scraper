@@ -1,5 +1,5 @@
 {
-  "description": "Fetch website traffic, rankings and engagement metrics through the official Similarweb API for competitor and SEO research. Export CSV/JSON. Requires your own paid Similarweb API access/key; no public-page scraping. Result/start fees and your API credits apply.",
-  "seoTitle": "Similarweb Traffic & Rankings API - Bring Your Key",
-  "seoDescription": "Export Similarweb website traffic, rankings and engagement data for competitor research. Requires your paid API access/key; start and result fees apply."
+  "description": "Turn authorized traffic CSV/JSON exports into US agency competitor reports, monthly change alerts and country-scope audits. No API key for imports and no public-page scraping. Optional Similarweb API mode needs your key/credits. Saved-domain and start fees apply.",
+  "seoTitle": "Similarweb Traffic Analysis & US Agency Reports",
+  "seoDescription": "Analyze authorized traffic CSV/JSON for US agency reports, monthly alerts and scope audits. Imports need no API key. Start and saved-domain fees apply."
 }

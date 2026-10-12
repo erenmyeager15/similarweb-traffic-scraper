@@ -1,7 +1,7 @@
 {
   "name": "similarweb-traffic-scraper",
   "version": "1.0.0",
-  "description": "Apify Actor that fetches website traffic and ranking data from the official Similarweb REST API using your own Similarweb API key",
+  "description": "Analyze authorized website traffic imports with CSV/JSON reports and optional official Similarweb API access; synthetic demo creates no dataset results",
   "type": "module",
   "main": "src/main.ts",
   "scripts": {
@@ -13,6 +13,9 @@
   },
   "dependencies": {
     "apify": "^3.1.0"
+  },
+  "overrides": {
+    "basic-ftp": "6.2.3"
   },
   "devDependencies": {
     "@apify/tsconfig": "^0.1.0",

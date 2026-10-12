@@ -43,9 +43,8 @@ function toNumber(value: unknown): number | null {
   if (value === null || value === undefined) return null;
   if (typeof value === 'number') return Number.isFinite(value) ? value : null;
   if (typeof value === 'string') {
-    const match = value.replace(/,/g, '').match(/-?\d+(?:\.\d+)?/);
-    if (!match) return null;
-    const n = Number(match[0]);
+    if (!/^[+-]?(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d+)?$/.test(value.trim())) return null;
+    const n = Number(value.trim().replace(/,/g, ''));
     return Number.isFinite(n) ? n : null;
   }
   return null;
@@ -84,10 +83,10 @@ export function validateDomains(domains: string[]): string[] {
 
 export function normalizeMonth(value: unknown): string | null {
   if (typeof value !== 'string') return null;
-  const m = value.trim().match(/^(\d{4})-(\d{2})/);
+  const m = value.trim().match(/^(\d{4})-(0[1-9]|1[0-2])(?:-(0[1-9]|[12]\d|3[01]))?$/);
   if (!m) return null;
-  const month = Number(m[2]);
-  if (month < 1 || month > 12) return null;
+  if (Number(m[1]) < 1900 || Number(m[1]) > 9999) return null;
+  if (m[3] && new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]))).getUTCDate() !== Number(m[3])) return null;
   return `${m[1]}-${m[2]}`;
 }
 
@@ -122,8 +121,12 @@ export function parseConfig(input: ActorInput | null): RunConfig {
   }
 
   const rawDomains = Array.isArray(input.domains) ? input.domains : [];
+  if (input.maxResults !== undefined && input.maxResults !== null && (typeof input.maxResults !== 'number'
+    || !Number.isInteger(input.maxResults) || input.maxResults < 1 || input.maxResults > MAX_DOMAINS)) {
+    throw new Error('maxResults must be an integer between 1 and 1,000 domains.');
+  }
   const maxResults = normalizePositiveInt(input.maxResults, rawDomains.length || 1);
-  const domains = validateDomains(rawDomains.slice(0, maxResults));
+  const domains = validateDomains(rawDomains).slice(0, maxResults);
   if (domains.length === 0) {
     throw new Error('No valid domains provided. Add at least one domain such as "openai.com" (without https:// or www.).');
   }
@@ -131,14 +134,20 @@ export function parseConfig(input: ActorInput | null): RunConfig {
   const country = typeof input.country === 'string' && input.country.trim()
     ? input.country.trim().toLowerCase()
     : 'world';
+  if (!/^(?:world|[a-z]{2})$/.test(country)) throw new Error('API country must be world or a two-letter country scope.');
 
   let startDate = normalizeMonth(input.startDate);
   let endDate = normalizeMonth(input.endDate);
+  if ((input.startDate !== undefined && input.startDate !== '' && !startDate)
+    || (input.endDate !== undefined && input.endDate !== '' && !endDate)) {
+    throw new Error('API dates must be real YYYY-MM or YYYY-MM-DD values.');
+  }
   if (!startDate || !endDate) {
     const def = defaultMonthRange(new Date());
     startDate = startDate ?? def.startDate;
     endDate = endDate ?? def.endDate;
   }
+  if (startDate > endDate) throw new Error('API startDate must not be later than endDate.');
 
   return { apiKey, domains, country, startDate, endDate };
 }
@@ -165,6 +174,7 @@ export function extractLatestNumber(data: unknown, key: string): number | null {
     }
     return null;
   }
+  if (series === null || series === undefined) return null;
 
   if (typeof series === 'object') {
     const obj = series as Record<string, unknown>;
@@ -222,9 +232,14 @@ export function extractCategory(data: unknown): string | null {
 }
 
 function normalizeBounce(value: number | null): number | null {
-  if (value === null) return null;
+  if (value === null || value < 0 || value > 100) return null;
   const asPercent = value <= 1 ? value * 100 : value;
   return round(asPercent, 1);
+}
+
+function metricValue(value: number | null, maximum = Number.MAX_SAFE_INTEGER, integer = false): number | null {
+  if (value === null || value < 0 || value > maximum || (integer && (!Number.isSafeInteger(value) || value === 0))) return null;
+  return value;
 }
 
 /** Builds a nullable-safe record from raw API responses. Never invents values. */
@@ -238,12 +253,12 @@ export function buildWebsiteRecord(
     country: config.country,
     startDate: config.startDate,
     endDate: config.endDate,
-    globalRank: extractRank(responses.globalRank, 'global_rank'),
-    categoryRank: extractRank(responses.categoryRank, 'category_rank'),
+    globalRank: metricValue(extractRank(responses.globalRank, 'global_rank'), Number.MAX_SAFE_INTEGER, true),
+    categoryRank: metricValue(extractRank(responses.categoryRank, 'category_rank'), Number.MAX_SAFE_INTEGER, true),
     category: extractCategory(responses.categoryRank),
-    monthlyVisits: round(extractLatestNumber(responses.visits, 'visits'), 0),
-    pagesPerVisit: round(extractLatestNumber(responses.pagesPerVisit, 'pages_per_visit'), 2),
-    avgVisitDuration: round(extractLatestNumber(responses.avgVisitDuration, 'average_visit_duration'), 2),
+    monthlyVisits: round(metricValue(extractLatestNumber(responses.visits, 'visits')), 0),
+    pagesPerVisit: round(metricValue(extractLatestNumber(responses.pagesPerVisit, 'pages_per_visit'), 10000), 2),
+    avgVisitDuration: round(metricValue(extractLatestNumber(responses.avgVisitDuration, 'average_visit_duration'), 86400), 2),
     bounceRate: normalizeBounce(extractLatestNumber(responses.bounceRate, 'bounce_rate')),
     source: 'similarweb-official-api',
     similarWebUrl: `https://www.similarweb.com/website/${domain}/`,
@@ -269,7 +284,7 @@ export function interpretChargeResult(result: ChargeResultLike): ChargeDecision 
 }
 
 // ---------------------------------------------------------------------------
-// Network + billing (integration; verified via approved cloud test)
+// Optional API network + billing; successful real-key verification is still required.
 // ---------------------------------------------------------------------------
 async function fetchMetric(
   config: RunConfig,
@@ -286,9 +301,9 @@ async function fetchMetric(
 
   let response: Response;
   try {
-    response = await fetch(url, { headers: { accept: 'application/json' } });
-  } catch (error) {
-    log.warning(`Network error calling Similarweb ${endpointPath} for ${domain}: ${(error as Error).message}`);
+    response = await fetch(url, { headers: { accept: 'application/json' }, signal: AbortSignal.timeout(30_000) });
+  } catch {
+    log.warning(`Network error or 30-second timeout calling Similarweb ${endpointPath} for ${domain}. No automatic retry.`);
     return { status: 0, data: null };
   }
 
@@ -330,8 +345,8 @@ async function saveWebsiteRecord(record: WebsiteRecord): Promise<boolean> {
     }
 
     return decision.recordWasSaved;
-  } catch (error) {
-    fatalBillingError = error instanceof Error ? error : new Error(String(error));
+  } catch {
+    fatalBillingError = new Error('Website output billing failed; no additional websites were processed. Previously saved records retain their normal charges.');
     spendingLimitReached = true;
     await Actor.setStatusMessage('Stopped because website output billing failed.');
     log.error(`Stopping SimilarWeb run because dataset push with website-scraped charge failed: ${fatalBillingError.message}`);
@@ -349,6 +364,11 @@ export async function scrapeSimilarWebDomain(
 ): Promise<{ saved: boolean; hadData: boolean }> {
   if (fatalBillingError) throw fatalBillingError;
   if (spendingLimitReached) return { saved: false, hadData: false };
+  if (Actor.getChargingManager().calculateMaxEventChargeCountWithinLimit(WEBSITE_SCRAPED_EVENT) <= 0) {
+    spendingLimitReached = true;
+    await Actor.setStatusMessage('Stopped at the spending limit before additional API requests or credits.');
+    return { saved: false, hadData: false };
+  }
 
   const trafficParams: Record<string, string | undefined> = {
     start_date: config.startDate ?? undefined,

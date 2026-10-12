@@ -1,0 +1,28 @@
+{
+  "actorId": "TxmFel0ZpRAj6FjXW",
+  "schedule": null,
+  "description": "Three explicit synthetic onboarding previews, not real data collection or metric-generating scheduled workflows. Publish only with the tested agency-feature build.",
+  "examples": [
+    {
+      "name": "us-traffic-competitor-report",
+      "title": "US Agency Traffic Comparison - Synthetic Preview",
+      "description": "Preview a US agency competitor report with explicitly synthetic traffic, matching monthly context and included-domain shares. No real traffic is fetched or result-billed. Start/usage costs may apply. For real analysis, supply an authorized export in import mode.",
+      "inputFile": "examples/us-agency-comparison.json",
+      "visibleFields": ["mode", "demoPreset", "reportFocusCountry"]
+    },
+    {
+      "name": "us-traffic-change-review",
+      "title": "US Traffic Change Alerts - Synthetic Preview",
+      "description": "Preview visit, bounce and global-rank threshold findings with exact invented prior/current evidence and units. No live traffic, automatic notification or dataset result. Start/usage costs may apply. Import your permitted export for real review findings.",
+      "inputFile": "examples/us-traffic-change-alerts.json",
+      "visibleFields": ["mode", "demoPreset", "reportFocusCountry", "visitChangeAlertPercent", "bounceIncreaseAlertPoints", "rankWorseningAlertPercent"]
+    },
+    {
+      "name": "us-traffic-scope-audit",
+      "title": "US Website Traffic Scope Audit - Synthetic Preview",
+      "description": "Preview why worldwide or unknown scope and missing months must not become US monthly findings. Synthetic examples only: no source fetching, dataset results or result fees. Start/usage costs may apply. Use an authorized export for real quality checks.",
+      "inputFile": "examples/us-scope-audit.json",
+      "visibleFields": ["mode", "demoPreset", "reportFocusCountry"]
+    }
+  ]
+}

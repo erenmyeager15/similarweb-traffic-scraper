@@ -1,14 +1,86 @@
 {
   "actorOutputSchemaVersion": 1,
   "title": "SimilarWeb Traffic Scraper Output",
-  "description": "Structured website traffic records from the official Similarweb API: domain, global and category rank, category, estimated monthly visits, pages per visit, average visit duration, bounce rate, country scope, SimilarWeb profile URL, and scraped timestamp.",
+  "description": "Authorized website traffic import analyses or optional official Similarweb API records. Import reports analyze user-supplied metrics, not live fetched or independently verified traffic.",
   "type": "object",
   "properties": {
     "results": {
       "type": "string",
       "title": "SimilarWeb website traffic records",
-      "description": "Clean dataset items containing official Similarweb API traffic, ranking, category, and engagement data by domain.",
+      "description": "One saved result per analyzed domain, with explicit source provenance. Imported records contain observations and within-export trends; official API records retain their existing fields.",
       "template": "{{links.apiDefaultDatasetUrl}}/items"
+    },
+    "importReport": {
+      "type": "string",
+      "title": "Import analysis JSON",
+      "description": "Import-only summary, saved websites and matched comparison rows. Contains no unsaved domains.",
+      "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/TRAFFIC_IMPORT_REPORT"
+    },
+    "comparisonCsv": {
+      "type": "string",
+      "title": "Traffic comparison CSV",
+      "description": "Import-only formula-safe flat observations, changes, context and included-domain shares.",
+      "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/TRAFFIC_COMPARISON.csv"
+    },
+    "importMarkdown": {
+      "type": "string",
+      "title": "Traffic analysis report",
+      "description": "Import-only human-readable findings with explicit coverage and comparison limits.",
+      "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/TRAFFIC_REPORT.md"
+    },
+    "agencyReport": {
+      "type": "string",
+      "title": "Agency evidence and scope audit JSON",
+      "description": "Import only: configurable monthly review signals, matching/other/unknown country scope and observation-level quality checks. Saved domains only; not live traffic or source certification.",
+      "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/TRAFFIC_AGENCY_REPORT"
+    },
+    "alertsCsv": {
+      "type": "string",
+      "title": "Traffic change alerts CSV",
+      "description": "Import only: threshold findings with exact supplied prior/current values, percentage or percentage-point units and matching adjacent-month context. No automatic notification.",
+      "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/TRAFFIC_ALERTS.csv"
+    },
+    "qualityCsv": {
+      "type": "string",
+      "title": "US scope and comparison-quality CSV",
+      "description": "Import only: missing metrics/context, period gaps, latest supplied month per scope and matched-peer coverage. Complete fields is not verified accuracy or rights.",
+      "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/TRAFFIC_QUALITY.csv"
+    },
+    "demoReport": {
+      "type": "string",
+      "title": "Synthetic demo JSON preview",
+      "description": "Demo only. Fixed illustrative values, not live Similarweb metrics or dataset results. No website-result events; Actor Start and applicable usage may apply.",
+      "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/DEMO_REPORT"
+    },
+    "demoCsv": {
+      "type": "string",
+      "title": "Synthetic demo CSV preview",
+      "description": "Demo only. Every observation is labeled synthetic; never used as customer traffic evidence.",
+      "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/DEMO_COMPARISON.csv"
+    },
+    "demoMarkdown": {
+      "type": "string",
+      "title": "Synthetic demo report preview",
+      "description": "Demo only. Illustrates the reporting format and real-import setup steps. It does not establish source access, uptime, revenue or margin.",
+      "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/DEMO_REPORT.md"
+    },
+    "demoAgencyReport": {
+      "type": "string",
+      "title": "Synthetic agency evidence preview",
+      "description": "Demo only: selected US preset's review signals and scope-quality checks. Every row is synthetic; zero dataset results and website-result events.",
+      "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/DEMO_AGENCY_REPORT"
+    },
+    "demoAlertsCsv": {
+      "type": "string",
+      "title": "Synthetic alert CSV preview",
+      "description": "Demo only. Labeled developer-authored change examples, not real traffic findings. Actor Start and platform usage may apply.",
+      "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/DEMO_ALERTS.csv"
+    },
+    "demoQualityCsv": {
+      "type": "string",
+      "title": "Synthetic scope-audit CSV preview",
+      "description": "Demo only. Preview country-scope and comparison coverage checks without creating dataset results.",
+      "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/DEMO_QUALITY.csv"
     }
   }
 }

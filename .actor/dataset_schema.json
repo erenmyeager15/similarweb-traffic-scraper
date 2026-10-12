@@ -6,10 +6,14 @@
   "views": {
     "overview": {
       "title": "Website Traffic",
-      "description": "Official Similarweb API traffic and ranking data by domain.",
+      "description": "Website analyses from authorized imports or the optional official Similarweb API. Source labels distinguish the workflows.",
       "transformation": {
         "fields": [
           "domain",
+          "source",
+          "dataProvider",
+          "observationCount",
+          "incompleteContextCount",
           "globalRank",
           "categoryRank",
           "category",
@@ -26,6 +30,10 @@
         "component": "table",
         "properties": {
           "domain": { "label": "Domain", "format": "text" },
+          "source": { "label": "Workflow source", "format": "text" },
+          "dataProvider": { "label": "User-provided export provider", "format": "text" },
+          "observationCount": { "label": "Imported observations", "format": "number" },
+          "incompleteContextCount": { "label": "Observations missing comparison context", "format": "number" },
           "globalRank": { "label": "Global Rank", "format": "number" },
           "categoryRank": { "label": "Cat. Rank", "format": "number" },
           "category": { "label": "Category", "format": "text" },

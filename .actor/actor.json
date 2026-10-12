@@ -1,8 +1,8 @@
 {
   "actorSpecification": 1,
   "name": "similarweb-traffic-scraper",
-  "title": "SimilarWeb Scraper - Website Traffic & Analytics",
-  "description": "Fetch website traffic, rankings and engagement metrics through the official Similarweb API for competitor and SEO research. Export CSV/JSON. Requires your own paid Similarweb API access/key; no public-page scraping. Result/start fees and your API credits apply.",
+  "title": "SimilarWeb Traffic Analytics & US Agency Reports",
+  "description": "Turn authorized traffic CSV/JSON exports into US agency competitor reports, monthly change alerts and country-scope audits. No API key for imports and no public-page scraping. Optional Similarweb API mode needs your key/credits. Saved-domain and start fees apply.",
   "version": "1.0",
   "dockerfile": "Dockerfile",
   "input": "../INPUT_SCHEMA.json",
@@ -20,9 +20,9 @@
           "isOneTimeEvent": true
         },
         "website-scraped": {
-          "eventTitle": "Website scraped",
-          "eventDescription": "Charged once for each domain that returns real data from the official Similarweb API. Domains with no data, failed requests, or an invalid API key are not charged.",
-          "eventPriceUsd": 0.005,
+          "eventTitle": "Website analyzed",
+          "eventDescription": "One saved website analysis containing authorized imported numeric observations or official Similarweb API metrics. No result event for invalid inputs, failed requests or unsaved domains. Actor Start may still apply.",
+          "eventPriceUsd": 0.002,
           "isPrimaryEvent": true,
           "isOneTimeEvent": false
         }
@@ -37,7 +37,7 @@
     "timeoutSecs": 3600
   },
   "exampleRunInput": {
-    "body": "{\n  \"apiKey\": \"YOUR_SIMILARWEB_API_KEY\",\n  \"domains\": [\"openai.com\"],\n  \"maxResults\": 1,\n  \"country\": \"world\"\n}",
+    "body": "{\n  \"mode\": \"demo\"\n}",
     "contentType": "application/json; charset=utf-8"
   },
   "storages": {

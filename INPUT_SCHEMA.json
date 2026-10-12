@@ -1,16 +1,99 @@
 {
-  "title": "SimilarWeb Traffic Scraper (official API, bring your own key)",
-  "description": "Fetch website traffic and ranking data from the OFFICIAL Similarweb REST API using your own Similarweb API key. This Actor is not a no-key public-page scraper: a valid Similarweb API subscription and key are required. Runs without a key fail immediately and are not charged.",
+  "title": "US Agency Traffic Reports - Authorized Import or Similarweb API",
+  "description": "Preview explicitly synthetic reports with zero website-result events, or import authorized CSV/JSON traffic observations without a Similarweb API key. Neither route fetches live Similarweb data. Optional official API inputs still require a key. Actor Start and applicable usage can apply to demo; real saved domain analyses have result fees.",
   "type": "object",
   "schemaVersion": 1,
-  "required": ["apiKey", "domains"],
+  "required": [],
   "properties": {
+    "mode": {
+      "title": "Data workflow",
+      "type": "string",
+      "editor": "select",
+      "enum": ["demo", "import", "official-api"],
+      "enumTitles": ["Preview synthetic reports (no website-result fee)", "Analyze my authorized export (no API key)", "Optional official API (experimental; access unverified)"],
+      "prefill": "demo",
+      "description": "Demo writes labeled synthetic report previews only: zero dataset results or website-result events; Actor Start and usage can apply. Import needs your permitted data. Official API needs your key/credits. No default is injected, preserving legacy API tasks. Demo never processes supplied data or credentials."
+    },
+    "demoPreset": {
+      "title": "US agency demo example",
+      "type": "string",
+      "editor": "select",
+      "enum": ["us-agency-comparison", "us-traffic-change-alerts", "us-scope-audit"],
+      "enumTitles": ["US competitor comparison", "US traffic change alerts", "US vs worldwide scope audit"],
+      "prefill": "us-agency-comparison",
+      "description": "Demo mode only. Developer-authored synthetic examples, not real Similarweb data. Zero dataset results or website-result events. Actor Start and usage can apply. Ignored by import/API workflows."
+    },
+    "authorizedData": {
+      "title": "I have permission to process this imported data",
+      "type": "boolean",
+      "description": "Required to be explicitly true for imports. Confirm only for data you own or are permitted to process through this Actor. This confirmation does not grant Similarweb data redistribution rights.",
+      "editor": "checkbox",
+      "prefill": false,
+      "sectionCaption": "No-key import"
+    },
+    "importSource": {
+      "title": "Export provider label",
+      "type": "string",
+      "editor": "textfield",
+      "maxLength": 100,
+      "description": "Required for import: identify the provider of this one export, for example your own analytics export or a Similarweb export you are authorized to process. The label is user-provided, not independently verified. Do not mix providers in one import."
+    },
+    "importRecords": {
+      "title": "JSON observations",
+      "type": "array",
+      "editor": "json",
+      "items": { "type": "object" },
+      "description": "Paste 1–1,000 observation objects, at most 2 MiB. Required domain and month (YYYY-MM), plus at least one numeric metric. Include country, trafficType and measurementType for comparisons. Provide JSON OR CSV, not both. No URLs are fetched."
+    },
+    "importCsv": {
+      "title": "CSV observations",
+      "type": "string",
+      "editor": "textarea",
+      "isSecret": true,
+      "description": "Paste CSV contents, not a file URL. Header plus up to 1,000 observations; 2 MiB maximum. Columns: domain,month,country,trafficType,measurementType,monthlyVisits,globalRank,categoryRank,category,pagesPerVisit,avgVisitDuration,bounceRate. JSON OR CSV, not both."
+    },
+    "reportFocusCountry": {
+      "title": "Agency report focus country",
+      "type": "string",
+      "editor": "textfield",
+      "prefill": "us",
+      "description": "Import/demo reporting focus, US if omitted. Use world or a two-letter scope. This only labels matching, different and unknown supplied scopes; it does not filter observations, change imported country values or prove US audience location.",
+      "sectionCaption": "Agency alerts and evidence reports"
+    },
+    "visitChangeAlertPercent": {
+      "title": "Monthly visit change threshold (%)",
+      "type": "number",
+      "editor": "number",
+      "prefill": 20,
+      "minimum": 0.1,
+      "maximum": 1000,
+      "description": "Import/demo only: flag supplied adjacent-month visit rises or drops at or above this absolute percentage threshold. Omitted means 20%. Matching provider, country, traffic type and basis are required. No signal with zero/unknown visit baseline or a period gap. These are review findings, not notifications or causal conclusions."
+    },
+    "bounceIncreaseAlertPoints": {
+      "title": "Bounce increase threshold (percentage points)",
+      "type": "number",
+      "editor": "number",
+      "prefill": 5,
+      "minimum": 0.1,
+      "maximum": 100,
+      "description": "Import/demo only: supplied adjacent-month bounce-rate increase threshold, default 5 percentage points. A change from 45% to 52% is +7 points, not +7%. Matching context and both metrics are required."
+    },
+    "rankWorseningAlertPercent": {
+      "title": "Global rank worsening threshold (%)",
+      "type": "number",
+      "editor": "number",
+      "prefill": 20,
+      "minimum": 0.1,
+      "maximum": 1000,
+      "description": "Import/demo only: flag a numerical increase in global rank above this adjacent-month percentage threshold, default 20%. Rank 100 to 130 is +30% (worse). No estimates or comparisons across differing context."
+    },
     "apiKey": {
       "title": "Similarweb API key",
       "type": "string",
-      "description": "Your official Similarweb API key from your Similarweb account (Account > API, or provided by your Similarweb plan). Required. The Actor calls the official Similarweb REST API on your behalf and never scrapes public pages. Each domain consumes your own Similarweb API credits.",
+      "description": "Required only for experimental official-api mode; not needed for imports. Bring your own Similarweb key/credits. Live key/plan access and API-mode profitability are unverified; import/demo tests do not establish them. Public pages are never scraped.",
       "editor": "textfield",
-      "isSecret": true
+      "isSecret": true,
+      "sectionCaption": "Optional official API workflow"
     },
     "domains": {
       "title": "Domains",
@@ -23,7 +106,7 @@
     "maxResults": {
       "title": "Max domains",
       "type": "integer",
-      "description": "Maximum number of domains from the list to query. Each domain uses your Similarweb API credits, so start with 1 for a low-cost test.",
+      "description": "Maximum whole website analyses to save. Import keeps all supplied months for each selected domain and applies one result event per saved domain, not per observation. Official API mode consumes your API credits. Start with 1.",
       "editor": "number",
       "default": 1,
       "prefill": 1,
@@ -33,7 +116,7 @@
     "country": {
       "title": "Country scope",
       "type": "string",
-      "description": "Country scope for traffic and engagement metrics: use 'world' for worldwide, or a two-letter ISO country code such as us, gb, or in. The value must be included in your Similarweb subscription.",
+      "description": "Official API mode only: country scope for traffic/engagement, world or a two-letter ISO code such as us. Must be covered by your Similarweb subscription. Import country comes from each supplied observation, not this setting.",
       "editor": "textfield",
       "default": "world",
       "prefill": "world"
